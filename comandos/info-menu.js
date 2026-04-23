@@ -9,30 +9,80 @@ export default {
   async execute({ sock, msg, jid, sender }) {
     const config = db.settings['config'] ?? {};
     const bannerUrl   = config.bannerUrl   ?? 'https://ryzecodes.xyz/files/2';
-    const channelJid  = config.channelJid  ?? null;
-    const channelName = config.channelName ?? botName;
-    const channelLink = config.channelLink ?? null;
+    const channelJid  = config.channelJid  ?? global.channelJid  ?? null;
+    const channelName = config.channelName ?? global.channelName ?? botName;
+    const channelLink = config.channelLink ?? global.channelLink ?? null;
 
+    // 🕐 Hora Colombia (UTC-5)
+    const now = new Date(
+      new Date().toLocaleString('en-US', { timeZone: 'America/Bogota' })
+    );
+    const hours   = now.getHours();
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const timeStr = `${hours}:${minutes}`;
+
+    const greeting =
+      hours >= 5  && hours < 12 ? '🌸 ¡Buenos días!'   :
+      hours >= 12 && hours < 18 ? '🌺 ¡Buenas tardes!' :
+                                   '🌙 ¡Buenas noches!';
+
+    // 📱 Dispositivo
+    const msgId = msg.key?.id ?? '';
+    const device =
+      msgId.startsWith('3A') || msgId.startsWith('3E') ? '🍎 iPhone'       :
+      msgId.startsWith('BA')                            ? '🖥️ WhatsApp Web' :
+      msgId.length === 16                               ? '🤖 Android'      :
+                                                          '📱 Dispositivo';
+
+    // 📋 Categorías
     const categories = {};
     for (const [name, cmd] of commands) {
-      const cat = cmd.category ?? 'sin categoría';
+      const cat = cmd.category ?? 'otros';
       if (!categories[cat]) categories[cat] = [];
-      categories[cat].push({ name, description: cmd.description ?? 'Sin descripción.' });
+      categories[cat].push({
+        name,
+        description: cmd.description ?? 'Sin descripción.',
+      });
     }
 
-    let text = `🎋 @${sender.split('@')[0]}, aquí está lo que puedo hacer.\n`;
+    const catEmojis = {
+      info:      '🎀',
+      utilidad:  '🌸',
+      juegos:    '🎮',
+      descargas: '💾',
+      admin:     '👑',
+      ia:        '✨',
+      nsfw:      '🔞',
+      otros:     '🌷',
+    };
+
+    // 💌 Mensaje
+    let text =
+`${greeting} @${sender.split('@')[0]} ♡
+
+🕐 *${timeStr}* • Colombia  •  ${device}
+
+✿ *${botName}*
+Hola~ soy Miku, la quinta quintilliza.
+Anota bien todito, ¿sí? (◕‿◕✿)
+`;
+
     for (const [cat, cmds] of Object.entries(categories)) {
-      text += `\n✦ *${cat.charAt(0).toUpperCase() + cat.slice(1)}*\n`;
+      const emoji = catEmojis[cat.toLowerCase()] ?? '🌷';
+      text += `\n${emoji} *${cat.charAt(0).toUpperCase() + cat.slice(1)}*\n`;
       for (const cmd of cmds) {
-        text += `  ${prefix}${cmd.name} — ${cmd.description}\n`;
+        text += `  ❥ ${prefix}${cmd.name} — ${cmd.description}\n`;
       }
     }
 
+    text += `\n♡ *${botName}* • Siempre aquí para ti~`;
+
+    // contextInfo
     const contextInfo = {
-      mentionedJid: [`${sender}@s.whatsapp.net`],
+      mentionedJid: [sender],
       externalAdReply: {
-        title: botName,
-        body: '🎋 Miku Nakano • Asistente',
+        title: `♡ ${botName}`,
+        body: '🎀 La quinta quintilliza • Asistente',
         thumbnailUrl: bannerUrl,
         mediaType: 1,
         renderLargerThumbnail: true,
