@@ -1,5 +1,5 @@
 global.prefix = '/';
-global.botName = 'WaBot';
+global.botName = 'Miku Nakano';
 global.owners = ['50498273976', '573135180876'];
 
 global.channelJid = '120363408940496562@newsletter';
