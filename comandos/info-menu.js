@@ -7,11 +7,13 @@ export default {
   category: 'info',
 
   async execute({ sock, msg, jid, sender }) {
-    const config = db.settings['config'] ?? {};
+    const config      = db.settings['config'] ?? {};
     const bannerUrl   = config.bannerUrl   ?? 'https://raw.githubusercontent.com/DuarteXV/Yotsuba-MD-Premium/main/uploads/056a29477e84a33e.jpg';
     const channelJid  = config.channelJid  ?? global.channelJid  ?? null;
     const channelName = config.channelName ?? global.channelName ?? botName;
     const channelLink = config.channelLink ?? global.channelLink ?? null;
+
+    const pushName = msg.pushName ?? sender.split('@')[0];
 
     // 🕐 Hora Colombia (UTC-5)
     const now = new Date(
@@ -58,7 +60,7 @@ export default {
 
     // 💌 Mensaje
     let text =
-`${greeting} @${sender.split('@')[0]} ♡
+`${greeting} ${pushName} ♡
 
 🕐 *${timeStr}* • Colombia  •  ${device}
 
