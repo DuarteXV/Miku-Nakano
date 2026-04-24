@@ -57,8 +57,9 @@ export default {
           tag: 'reaction',
           attrs: {
             'server-message-id': serverMsgId.toString(),
+            code: emoji,
           },
-          content: emoji,
+          content: [],
         }],
       });
 
