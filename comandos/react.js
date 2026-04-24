@@ -46,30 +46,33 @@ export default {
         text: `❥ newsletterJid: ${meta.id}`,
       }, { quoted: msg });
 
-      await sock.query({
-        tag: 'iq',
-        attrs: {
-          to: meta.id,
-          type: 'set',
-          xmlns: 'w:newsletter',
-        },
-        content: [{
-          tag: 'reaction',
-          attrs: {
-            'server-message-id': serverMsgId.toString(),
-            code: emoji,
-          },
-          content: [],
-        }],
-      });
+      // Intento 1
+      await sock.sendMessage(jid, { text: '❥ Intentando newsletterSendReaction...' }, { quoted: msg });
+      try {
+        await sock.newsletterSendReaction(meta.id, serverMsgId, emoji);
+        await sock.sendMessage(jid, { text: '✿ newsletterSendReaction funcionó~ ♡' }, { quoted: msg });
+        return;
+      } catch (e1) {
+        await sock.sendMessage(jid, { text: `❥ newsletterSendReaction falló: ${e1.message}` }, { quoted: msg });
+      }
+
+      // Intento 2
+      await sock.sendMessage(jid, { text: '❥ Intentando sendNewsletterReaction...' }, { quoted: msg });
+      try {
+        await sock.sendNewsletterReaction(meta.id, serverMsgId, emoji);
+        await sock.sendMessage(jid, { text: '✿ sendNewsletterReaction funcionó~ ♡' }, { quoted: msg });
+        return;
+      } catch (e2) {
+        await sock.sendMessage(jid, { text: `❥ sendNewsletterReaction falló: ${e2.message}` }, { quoted: msg });
+      }
 
       await sock.sendMessage(jid, {
-        text: `✿ Reaccioné con ${emoji} al mensaje~ ♡`,
+        text: '🌷 Ningún método funcionó... (´;ω;´)',
       }, { quoted: msg });
 
     } catch (err) {
       await sock.sendMessage(jid, {
-        text: '🌷 Error:\n' + err.message,
+        text: '🌷 Error general:\n' + err.message,
       }, { quoted: msg });
     }
   },
