@@ -8,7 +8,7 @@ export default {
   owner: true,
 
   async execute({ sock, msg, jid, args }) {
-    const quoted  = msg.message?.extendedTextMessage?.contextInfo?.quotedMessage;
+    const quoted   = msg.message?.extendedTextMessage?.contextInfo?.quotedMessage;
     const mediaMsg = msg.message?.imageMessage ?? quoted?.imageMessage;
 
     let bannerUrl;
@@ -17,7 +17,7 @@ export default {
       bannerUrl = args[0];
     } else {
       if (!mediaMsg) return sock.sendMessage(jid, {
-        text: `🎋 Manda una imagen con el comando, responde a una, o usa: ${prefix}setbanner <url>`,
+        text: `🌸 Mándame una imagen, responde a una, o usa: *${prefix}setbanner <url>* ♡`,
       }, { quoted: msg });
 
       const stream = await downloadContentFromMessage(mediaMsg, 'image');
@@ -25,9 +25,9 @@ export default {
       for await (const chunk of stream) chunks.push(chunk);
       const buffer = Buffer.concat(chunks);
 
-      const base64  = buffer.toString('base64');
+      const base64   = buffer.toString('base64');
       const mimetype = mediaMsg.mimetype ?? 'image/png';
-      const ext     = mimetype.split('/')[1] ?? 'png';
+      const ext      = mimetype.split('/')[1] ?? 'png';
 
       const uploadRes = await fetch('https://cdn.adoolab.xyz/api/upload', {
         method: 'POST',
@@ -44,7 +44,7 @@ export default {
       console.log('[setbanner] CDN:', JSON.stringify(json));
 
       if (!json.url) return sock.sendMessage(jid, {
-        text: `🎋 El CDN no devolvió una URL. Respuesta: ${JSON.stringify(json)}`,
+        text: `🌷 El CDN no devolvió una URL... gomen ne~ (´；ω；`)\n${JSON.stringify(json)}`,
       }, { quoted: msg });
 
       bannerUrl = json.url;
@@ -54,7 +54,7 @@ export default {
     db.settings['config'] = { ...current, bannerUrl };
 
     await sock.sendMessage(jid, {
-      text: `🎋 Banner actualizado.\n${bannerUrl}`,
+      text: `✿ ¡Banner actualizado~ ♡\n${bannerUrl}`,
     }, { quoted: msg });
   },
 };
