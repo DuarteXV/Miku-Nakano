@@ -9,6 +9,14 @@ export default {
     const emoji = parts[0]?.trim();
     const link  = parts[1]?.trim();
 
+    const debug = [
+      `❥ emoji: ${emoji ?? 'undefined'}`,
+      `❥ link: ${link ?? 'undefined'}`,
+      `❥ match: ${link ? JSON.stringify(link.match(/channel\/([a-zA-Z0-9_-]+)\/(\d+)/)) : 'sin link'}`,
+    ].join('\n');
+
+    await sock.sendMessage(jid, { text: debug }, { quoted: msg });
+
     if (!emoji || !link) {
       await sock.sendMessage(jid, {
         text: `🌸 Uso: *${prefix}react <emoji>, <link del mensaje>* ♡`,
@@ -27,8 +35,16 @@ export default {
     const channelCode = match[1];
     const serverMsgId = parseInt(match[2]);
 
+    await sock.sendMessage(jid, {
+      text: `❥ channelCode: ${channelCode}\n❥ serverMsgId: ${serverMsgId}`,
+    }, { quoted: msg });
+
     try {
       const meta = await sock.newsletterMetadata('invite', channelCode);
+
+      await sock.sendMessage(jid, {
+        text: `❥ newsletterJid: ${meta.id}`,
+      }, { quoted: msg });
 
       await sock.query({
         tag: 'iq',
