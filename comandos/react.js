@@ -4,18 +4,26 @@ export default {
   category: 'utilidad',
 
   async execute({ sock, msg, jid, args }) {
-    const emoji = args[0];
-    const link  = args[1];
+    const raw   = args.join(' ');
+    const parts = raw.split(',');
+    const emoji = parts[0]?.trim();
+    const link  = parts[1]?.trim();
+
+    const debug = [
+      `❥ emoji: ${emoji ?? 'undefined'}`,
+      `❥ link: ${link ?? 'undefined'}`,
+      `❥ match: ${link ? JSON.stringify(link.match(/channel\/([a-zA-Z0-9_-]+)\/(\d+)/)) : 'sin link'}`,
+    ].join('\n');
+
+    await sock.sendMessage(jid, { text: debug }, { quoted: msg });
 
     if (!emoji || !link) {
       await sock.sendMessage(jid, {
-        text: `🌸 Uso: *${prefix}react <emoji> <link del mensaje>* ♡`,
+        text: `🌸 Uso: *${prefix}react <emoji>, <link del mensaje>* ♡`,
       }, { quoted: msg });
       return;
     }
 
-    // Extraer newsletterJid y messageId del link
-    // Formato: https://whatsapp.com/channel/XXXXX/messageId
     const match = link.match(/channel\/([a-zA-Z0-9_-]+)\/(\d+)/);
     if (!match) {
       await sock.sendMessage(jid, {
@@ -27,11 +35,17 @@ export default {
     const channelCode = match[1];
     const serverMsgId = parseInt(match[2]);
 
+    await sock.sendMessage(jid, {
+      text: `❥ channelCode: ${channelCode}\n❥ serverMsgId: ${serverMsgId}`,
+    }, { quoted: msg });
+
     try {
       const meta = await sock.newsletterMetadata('invite', channelCode);
-      const newsletterJid = meta.id;
+      await sock.sendMessage(jid, {
+        text: `❥ newsletterJid: ${meta.id}`,
+      }, { quoted: msg });
 
-      await sock.newsletterReactMessage(newsletterJid, serverMsgId, emoji);
+      await sock.newsletterReactMessage(meta.id, serverMsgId, emoji);
 
       await sock.sendMessage(jid, {
         text: `✿ Reaccioné con ${emoji} al mensaje~ ♡`,
@@ -39,7 +53,7 @@ export default {
 
     } catch (err) {
       await sock.sendMessage(jid, {
-        text: '🌷 No pude reaccionar... gomen ne~ (´;ω;´)\n' + err.message,
+        text: '🌷 Error:\n' + err.message,
       }, { quoted: msg });
     }
   },
